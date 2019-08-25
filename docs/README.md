@@ -39,7 +39,7 @@ You will need at least version `3.0.0` for `Rambdax` versions after `0.12.0`.
 
 Methods between `allFalse` and `when` belong to **Rambdax**, while methods between `add` and `without` are inherited from **Rambda**.
 
-Several methods are dropped between versions `0.24.0` and `1.0.0`. The older version of the API is located (/files/deprecated/README.md)[here.]
+Several methods are dropped between versions `0.24.0` and `1.0.0`. The older version of the API is located [/files/deprecated/README.md](here.)
 
 ---
 #### allFalse
@@ -289,7 +289,7 @@ It is similar to `R.defaultTo`, but its definition for truthy value is different
 
 - Truthy with `Boolean`
 - Has the same type as `defaultValue`(according to `R.type`)
-- It is neigher empty object or empty array
+- It is neither empty object or empty array
 
 ```
 R.defaultToStrict('foo', undefined) // => 'foo'
@@ -654,6 +654,8 @@ If validation fails, it returns `false`.
 
 Please [check the detailed explanation](https://github.com/selfrefactor/rambdax/blob/master/files/isValid.md) as it is hard to write a short description of this method.
 
+Independently, somebody else came with very similar idea called [superstruct](https://github.com/ianstormtaylor/superstruct)
+
 ```
 const result = R.isValid({
   input:{ a: ['foo','bar'] },
@@ -667,31 +669,6 @@ const result = R.isValid({
 [Test](https://github.com/selfrefactor/rambdax/blob/master/src/isValid.spec.js)
 
 <a href="https://rambda.now.sh?const%20result%20%3D%20R.isValid(%7B%0A%20%20input%3A%7B%20a%3A%20%5B'foo'%2C'bar'%5D%20%7D%2C%0A%20%20schema%3A%20%7Ba%3A%20%5B'string'%5D%20%7D%0A%7D)%0A%2F%2F%20%3D%3E%20true">Try in REPL</a>
-
----
-#### log
-
-> log(...inputs: any[]): void
-
-It conditionally logs to `console.log` depending on the input of `R.logInit`
-
-```
-logInit()
-
-R.log(1,2,3)  // => 1,2,3
-
-logInit({logFlag: false})
-
-R.log(1,2,3)  // => void
-
-logInit({pushFlag: true})
-
-R.log(1,2,3) // => 1,2,3
-R.log(null)  // => null
-R.logHolder  // => [ [1,2,3], [null] ]
-```
-
-[Test](https://github.com/selfrefactor/rambdax/blob/master/src/log.spec.js)
 
 ---
 #### maybe
@@ -839,7 +816,7 @@ const master = {
   age: 40,
   contact: { email: 'baz@example.com' },
 }
-const result = mergeDeep(aBase,bBase)
+const result = mergeDeep(slave,master)
 
 const expected = {
   "age": 40,
@@ -989,16 +966,48 @@ const result = R.pass(1,['foo','bar'])('number',['string'])
 ---
 #### partition
 
-> partition<T>(rule: Function,input: T): [T, T]
+> partition<T>(predicate: Function, input: Array|Object): [Array|Object, Array|Object]
 
 It is similar to `R.filter` but it will return also the instances that are not passing the predicate function.
 
-In regards to the typing definition above, `T` can be either array of object.
+It works also with object as input. Please check the example below:
 
 ```
-import { partition } from './partition'
+import { partition } from 'rambdax'
 
-test('with list', () =>{
+test('with object', () => {
+  const predicate = (value, prop) => {
+    expect(
+      typeof prop
+    ).toBe('string')
+
+    return value > 2
+  }
+  const input = {
+    a : 1,
+    b : 2,
+    c : 3,
+    d : 4,
+  }
+
+  const result = partition(predicate, input)
+  const expectedResult = [
+    {
+      c : 3,
+      d : 4,
+    },
+    {
+      a : 1,
+      b : 2,
+    },
+  ]
+
+  expect(
+    result
+  ).toEqual(expectedResult)
+})
+
+test('with array', () =>{
   const rule = (x, i) => {
     expect(
       typeof i
@@ -1015,7 +1024,6 @@ test('with list', () =>{
     result
   ).toEqual(expectedResult)
 })
-
 ```
 
 [Test](https://github.com/selfrefactor/rambdax/blob/master/src/partition.spec.js)
@@ -1069,6 +1077,8 @@ const expected = 'RAMBDAX_DELAY104'
 #### produce
 
 > produce(conditions: Object, input: any): Promise|Object
+
+It is very similar to [Ramda's 'applySpec' method](https://ramdajs.com/docs/#applySpec)
 
 ```
 const conditions = {
@@ -1351,6 +1361,17 @@ const result = await getMemberName('FOO')
 [Test](https://github.com/selfrefactor/rambdax/blob/master/src/then.spec.js)
 
 ---
+#### toDecimal
+
+> toDecimal(num: number, charsAfterDecimalPoint: number): number
+
+```
+R.toDecimal(2.45464,2) // => 2.45
+```
+
+[Test](https://github.com/selfrefactor/rambdax/blob/master/src/toDecimal.spec.js)
+
+---
 #### throttle
 
 > throttle(fn: Function, period: number): Function
@@ -1483,21 +1504,6 @@ test('when async + fn', async () => {
 ```
 
 [Test](https://github.com/selfrefactor/rambdax/blob/master/src/tryCatch.spec.js)
-
----
-#### underscore
-
-> _ : object
-
-A proxy object which always returns the target property parsed to constant case
- 
-```
-console.log(_.foo) // => 'FOO'
-console.log(_.BAR) // => 'BAR'
-console.log(_.fooBar) // => 'FOO_BAR'
-```
-
-[Test](https://github.com/selfrefactor/rambdax/blob/master/src/underscore.spec.js)
 
 ---
 #### unless

@@ -1,3 +1,4 @@
+import { equals } from './equals'
 /**
  * Returns `true` if the specified value is equal, in [`R.equals`](#equals)
  * terms, to at least one element of the given list; `false` otherwise.
@@ -17,12 +18,21 @@
  *      R.includes([42], [[42]]); //=> true
  *      R.includes('ba', 'banana'); //=>true
  */
-export function includes (target, list) {
-  if (arguments.length === 1) return _list => includes(target, _list)
+export function includes(target, list){
+  if (arguments.length === 1) return _input => includes(target, _input)
 
-  const ok = Array.isArray(list) || typeof list === 'string'
+  if (typeof list === 'string'){
+    return list.includes(target)
+  }
+  if (!Array.isArray(list)) return false
 
-  if (!ok) return false
+  let index = -1
 
-  return list.includes(target)
+  while (++index < list.length){
+    if (equals(list[ index ], target)){
+      return true
+    }
+  }
+
+  return false
 }

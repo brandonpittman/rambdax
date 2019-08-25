@@ -20,6 +20,7 @@ declare namespace R {
   type MapFn<In, Out> = (x: In, index: number) => Out  
   
   type FilterFunction<T> = (x: T, prop?: string, inputObj?: object) => boolean
+  type PartitionPredicate<T> = (x: T, prop?: string) => boolean
   type MapFunction<In, Out> = (x: In, prop?: string, inputObj?: object) => Out
   type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>
 
@@ -164,8 +165,6 @@ declare namespace R {
   // RAMDA_END
   interface X {
     // RAMBDAX_START
-    _: any
-
     allFalse(...input: Array<any>): boolean
     anyFalse(...input: Array<any>): boolean
 
@@ -270,10 +269,6 @@ declare namespace R {
       maybePromiseFunctionOrAsync: any
     ): boolean
 
-    log(...inputs: any[]): void  
-    logInput(input?:{logFlag: boolean, pushFlag: boolean}): void
-    logHolder: Array<Array<any>>
-
     maybe<T>(ifRule: any, whenIf: any, whenElse: any, maybeInput?: any): T
 
     mapAsync<T>(fn: Async<any>, list: any[]): Promise<Array<T>>
@@ -284,6 +279,9 @@ declare namespace R {
     mapFastAsync<T>(fn: Async<any>, list: any[]): Promise<Array<T>>
     mapFastAsync<T>(fn: Async<any>): (list: any[]) => Promise<Array<T>>
 
+    mapToObject<T, U>(fn: (input: T) => object, list: T[]): U  
+    mapToObject<T, U>(fn: (input: T) => object): (list: T[]) => U  
+
     memoize<T>(fn: Function | Async<any>): T
 
     mergeRight(x: object, y: object): object
@@ -293,7 +291,9 @@ declare namespace R {
     mergeDeep<T>(slave: object, master: object): T
 
     nextIndex(index: number, list: any[]): number
+    nextIndex(index: number, list: number): number
     prevIndex(index: number, list: any[]): number
+    prevIndex(index: number, list: number): number
 
     opposite<Out>(fn: Fn<any, Out>): Fn<any, Out>
     
@@ -311,12 +311,12 @@ declare namespace R {
     then<T>(toResolve: Function) : (toResolve: Promise<any>) => Promise<T>
 
     partition<T>(
-      rule: FilterFunction<T>,
-      input: Object
+      rule: PartitionPredicate<T>,
+      input: {[key: string]: T}
     ): [Object, Object]
     partition<T>(
-      rule: FilterFunction<T>
-    ): (input: Object) => [Object, Object]
+      rule: PartitionPredicate<T>
+    ): (input: {[key: string]: T}) => [Object, Object]
     
     partition<T>(
       rule: Predicate<T>,
@@ -376,7 +376,9 @@ declare namespace R {
     ): (createInputFn: Promise<any>) => Promise<Out>
     then<Out>(createResultFn: Fn<any, Out>, createInputFn: Promise<any>): Promise<Out>
 
-    throttle<T>(fn: T, ms: number): ReplaceReturnType<T, void>;    
+    throttle<T>(fn: T, ms: number): ReplaceReturnType<T, void>
+    
+    toDecimal(num: number, charsAfterDecimalPoint?: number): number    
     
     template(inputWithTags: string, templateArguments: object): string
     template(inputWithTags: string): (templateArguments: object) => string
@@ -393,7 +395,7 @@ declare namespace R {
     waitFor(
       waitForTrueCondition: Function|Promise<any>, 
       msHowLong: number
-    ): (input: any) => Promise<boolean>
+    ): (input?: any) => Promise<boolean>
 
     when<T>(
       rule: Func<boolean> | boolean, ruleTrue: any
@@ -505,11 +507,6 @@ add(a: number, b: number): number
     concat(first: string, second: string): string
     concat(first: string): (second: string) => string
 
-    contains(target: string, list: string): boolean
-    contains<T>(target: T, list: T[]): boolean
-    contains(target: string): (list: string) => boolean
-    contains<T>(target: T): (list: T[]) => boolean
-
     curry<T1, T2, TResult extends T2>(fn: (a: T1, b: T2) => b is TResult): CurriedTypeGuard2<T1, T2, TResult>
     curry<T1, T2, T3, TResult extends T3>(fn: (a: T1, b: T2, c: T3) => c is TResult): CurriedTypeGuard3<T1, T2, T3, TResult>
     curry<T1, T2, T3, T4, TResult extends T4>(fn: (a: T1, b: T2, c: T3, d: T4) => d is TResult): CurriedTypeGuard4<T1, T2, T3, T4, TResult>
@@ -557,6 +554,11 @@ add(a: number, b: number): number
     equals<T>(a: T, b: T): boolean
     equals<T>(a: T): (b: T) => boolean
 
+    fromPairs<V>(pairs: Array<KeyValuePair<string, V>>): { [index: string]: V };
+    fromPairs<V>(pairs: Array<KeyValuePair<number, V>>): { [index: number]: V };
+
+    toPairs<S>(obj: { [k: string]: S } | { [k: number]: S }): Array<[string, S]>;
+
     F(): boolean
 
     filter<T>(fn: FilterFunction<T>): Filter<T>
@@ -599,8 +601,10 @@ add(a: number, b: number): number
 
     inc(n: number): number
 
-    includes(target: any, input: string|any[]): boolean
-    includes(target: any) : (input: string|any[]) => boolean
+    includes(target: string, list: string): boolean
+    includes<T>(target: T, list: T[]): boolean
+    includes(target: string): (list: string) => boolean
+    includes<T>(target: T): (list: T[]) => boolean
 
     indexBy<T>(fn: (x: T) => string, list: T[]): { [key: string]: T }
     indexBy<T>(fn: (x: T) => string): (list: T[]) => { [key: string]: T }
@@ -630,13 +634,14 @@ add(a: number, b: number): number
 
     length<T>(list: T[]): number
 
-    map<In, Out>(fn: MapFunction<In, Out>): MapInterface<Out>
     map<In, Out>(fn: MapFunction<In, Out>, list: In[]): Out[]
-
+    map<In, Out>(fn: MapFunction<In, Out>): (list: In[]) => Out[]
+    
     map<In, Out>(
       fn: MapFunction<In, Out>,
       obj: Dictionary<In>
     ): Dictionary<Out>
+    map<In, Out>(fn: MapFunction<In, Out>): Dictionary<Out>
 
     match(regexp: RegExp, input: string): any[]
     match(regexp: RegExp): (input: string) => any[]

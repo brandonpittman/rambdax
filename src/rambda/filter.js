@@ -1,3 +1,15 @@
+function filterObject(fn, obj){
+  const willReturn = {}
+
+  for (const prop in obj){
+    if (fn(obj[ prop ], prop, obj)){
+      willReturn[ prop ] = obj[ prop ]
+    }
+  }
+
+  return willReturn
+}
+
 /**
  * Takes a predicate and a `Filterable`, and returns a new filterable of the
  * same type containing the members of the given filterable which satisfy the
@@ -22,14 +34,14 @@
  *
  *      R.filter(isEven, {a: 1, b: 2, c: 3, d: 4}); //=> {b: 2, d: 4}
  */
-export function filter (fn, list) {
+export function filter(fn, list){
   if (arguments.length === 1) return _list => filter(fn, _list)
 
-  if (list === undefined) {
+  if (list === undefined){
     return []
   }
 
-  if (!Array.isArray(list)) {
+  if (!Array.isArray(list)){
     return filterObject(fn, list)
   }
 
@@ -38,23 +50,11 @@ export function filter (fn, list) {
   const len = list.length
   const willReturn = []
 
-  while (++index < len) {
-    const value = list[index]
+  while (++index < len){
+    const value = list[ index ]
 
-    if (fn(value, index)) {
-      willReturn[resIndex++] = value
-    }
-  }
-
-  return willReturn
-}
-
-function filterObject (fn, obj) {
-  const willReturn = {}
-
-  for (const prop in obj) {
-    if (fn(obj[prop], prop, obj)) {
-      willReturn[prop] = obj[prop]
+    if (fn(value, index)){
+      willReturn[ resIndex++ ] = value
     }
   }
 

@@ -29,7 +29,7 @@
  *      const people = [clara, bob, alice];
  *      sortByNameCaseInsensitive(people); //=> [alice, bob, clara]
  */
-export function sortBy (fn, list) {
+export function sortBy(fn, list){
   if (arguments.length === 1) return _list => sortBy(fn, _list)
 
   const arrClone = list.concat()
@@ -38,6 +38,8 @@ export function sortBy (fn, list) {
     const fnA = fn(a)
     const fnB = fn(b)
 
-    return fnA < fnB ? -1 : fnA > fnB ? 1 : 0
+    if (fnA === fnB) return 0
+
+    return fnA < fnB ? -1 : 1
   })
 }

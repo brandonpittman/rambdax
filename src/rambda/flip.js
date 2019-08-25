@@ -1,3 +1,15 @@
+function flipExport(fn){
+  return (...input) => {
+    if (input.length === 1){
+      return holder => fn(holder, input[ 0 ])
+    } else if (input.length === 2){
+      return fn(input[ 1 ], input[ 0 ])
+    }
+
+    return undefined
+  }
+}
+
 /**
  * Returns a new function much like the supplied one, except that the first two
  * arguments' order is reversed.
@@ -14,18 +26,6 @@
  *      R.flip(mergeThree)(1, 2, 3); //=> [2, 1, 3]
  * @symb R.flip(f)(a, b, c) = f(b, a, c)
  */
-export function flip (fn) {
+export function flip(fn){
   return flipExport(fn)
-}
-
-function flipExport (fn) {
-  return (...input) => {
-    if (input.length === 1) {
-      return holder => fn(holder, input[0])
-    } else if (input.length === 2) {
-      return fn(input[1], input[0])
-    }
-
-    return undefined
-  }
 }

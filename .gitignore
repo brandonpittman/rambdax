@@ -1,5 +1,6 @@
 *.json
 dist
+.docz
 lib
 # Logs
 logs

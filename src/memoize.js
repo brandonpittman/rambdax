@@ -8,7 +8,7 @@ import { type } from './rambda/type'
 const cache = {}
 
 const normalizeObject = obj => {
-  const sortFn = (a, b) => a > b
+  const sortFn = (a, b) => a > b ? 1 : -1
   const willReturn = {}
   compose(
     map(prop => willReturn[ prop ] = obj[ prop ]),
@@ -26,7 +26,7 @@ const stringify = a => {
 
     return replace(/\s/g, '_', take(15, compacted))
   } else if (type(a) === 'Object'){
-    a = normalizeObject(a)
+    return JSON.stringify(normalizeObject(a))
   }
 
   return JSON.stringify(a)
@@ -40,12 +40,13 @@ const generateProp = (fn, ...inputArguments) => {
 
   return `${ propString }${ stringify(fn) }`
 }
-
+// with weakmaps
 export function memoize(fn, ...inputArguments){
   if (arguments.length === 1){
     return (...inputArgumentsHolder) =>
       memoize(fn, ...inputArgumentsHolder)
   }
+
   const prop = generateProp(fn, ...inputArguments)
   if (prop in cache) return cache[ prop ]
 

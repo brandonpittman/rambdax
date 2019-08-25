@@ -1,5 +1,36 @@
 import { delay } from './delay'
-import { isValid } from './isValid'
+import { isValid, isPrototype } from './isValid'
+
+test('is prototype', () => {
+  expect(isPrototype(Promise)).toBe(true)
+  expect(isPrototype(Number)).toBe(true)
+  expect(isPrototype(Boolean)).toBe(true)
+  expect(isPrototype(String)).toBe(true)
+  expect(isPrototype(0)).toBe(false)
+})
+
+test('prototype inside array', () => {
+  const input = { a : [ 1, 2, 3, 4 ] }
+  // const schema = { a : [ 'number' ] }
+  const schema = { a : [ Number ] }
+  expect(
+    isValid({
+      input,
+      schema,
+    })
+  ).toBeTruthy()
+})
+
+test('with Promise prototype', () => {
+  const input = { a : [ delay(1), delay(2) ] }
+  const schema = { a : [ Promise ] }
+  expect(
+    isValid({
+      input,
+      schema,
+    })
+  ).toBeTruthy()
+})
 
 test('object prototype as rule - true', () => {
   const input = { a : {} }
@@ -237,6 +268,9 @@ test('type can be `async`', () => {
 test('type can be `promise`', () => {
   const input = { a : delay(1999) }
   const schema = { a : 'promise' }
+  // TODO
+  // ============================================
+  // const schema = { a : Promise }
   expect(
     isValid({
       input,

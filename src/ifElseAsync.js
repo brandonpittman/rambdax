@@ -1,3 +1,4 @@
+// todo move to internals
 function createThenable(x){
   return async function(input){
     return x(input)

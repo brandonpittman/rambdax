@@ -52,7 +52,7 @@ test('composeAsync', async () => {
 
 test('error', async () => {
   try {
-    const result = await mapAsync(rejectDelay)([ 1, 2, 3 ])
+    await mapAsync(rejectDelay)([ 1, 2, 3 ])
   } catch (err){
     expect(err).toBe(21)
   }

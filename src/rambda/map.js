@@ -1,3 +1,13 @@
+function mapObject(fn, obj){
+  const willReturn = {}
+
+  for (const prop in obj){
+    willReturn[ prop ] = fn(obj[ prop ], prop, obj)
+  }
+
+  return willReturn
+}
+
 /**
  * Takes a function and
  * a [functor](https://github.com/fantasyland/fantasy-land#functor),
@@ -30,13 +40,13 @@
  * @symb R.map(f, { x: a, y: b }) = { x: f(a), y: f(b) }
  * @symb R.map(f, functor_o) = functor_o.map(f)
  */
-export function map (fn, list) {
+export function map(fn, list){
   if (arguments.length === 1) return _list => map(fn, _list)
 
-  if (list === undefined) {
+  if (list === undefined){
     return []
   }
-  if (!Array.isArray(list)) {
+  if (!Array.isArray(list)){
     return mapObject(fn, list)
   }
 
@@ -44,18 +54,8 @@ export function map (fn, list) {
   const len = list.length
   const willReturn = Array(len)
 
-  while (++index < len) {
-    willReturn[index] = fn(list[index], index)
-  }
-
-  return willReturn
-}
-
-function mapObject (fn, obj) {
-  const willReturn = {}
-
-  for (const prop in obj) {
-    willReturn[prop] = fn(obj[prop], prop, obj)
+  while (++index < len){
+    willReturn[ index ] = fn(list[ index ], index)
   }
 
   return willReturn
